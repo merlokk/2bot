@@ -2,8 +2,8 @@ unit uFasade;
 
 interface
 uses
-  SysUtils, pFIBQuery,
-  uLogger, uServerConnect, uGameItems, uStrategy, uDB;
+  SysUtils, Classes, pFIBQuery,
+  uLogger, uServerConnect, uGameItems, uStrategy, uDB, uProxyCheck;
 
 type
  TMoonFasade = class
@@ -12,6 +12,8 @@ type
    FServerID: integer;
    FUserName,
    FPassword: string;
+
+   FProxy: TProxy;
 
    FWorking: boolean;
 
@@ -28,16 +30,42 @@ type
    procedure Run;
 
    procedure CreateWorld;
+   procedure AddProxyToDB(filename: string);
+
+   procedure ClearProxy;
+   procedure SetProxy(ip, port: string);
 
    property ServerURL: string read FServerURL write FServerURL;
    property ServerID: integer read FServerID write FServerID;
    property UserName: string read FUserName write FUserName;
    property Password: string read FPassword write FPassword;
+
+   property Proxy: TProxy read FProxy;
  end;
 
 implementation
 
 { TMoonFasade }
+
+procedure TMoonFasade.AddProxyToDB(filename: string);
+var
+  pc: TProxyChecker;
+  sl: TStringList;
+  prx: TProxies;
+begin
+  try
+    sl := TStringList.Create;
+    sl.LoadFromFile(filename);
+
+    pc := TProxyChecker.Create;
+    prx := pc.CheckList(sl.Text);
+
+
+    pc.Free;
+    sl.Free;
+  except
+  end;
+end;
 
 procedure TMoonFasade.Clear;
 begin
@@ -45,6 +73,13 @@ begin
   FImperium := nil;
   FStExec := nil;
   FWorking := false;
+
+  ClearProxy;
+end;
+
+procedure TMoonFasade.ClearProxy;
+begin
+  FProxy.Active := false;
 end;
 
 constructor TMoonFasade.Create;
@@ -89,6 +124,7 @@ begin
  FDB.Connect;
 
  FMoonServer := TMoonServerConnect.Create;
+ FMoonServer.SetProxy(FProxy);
  FMoonServer.Login(FServerURL, FServerID, FUserName, FPassword);
 
  FImperium := TImperium.Create;
@@ -139,6 +175,17 @@ begin
  finally
    FWorking := false;
  end;
+end;
+
+procedure TMoonFasade.SetProxy(ip, port: string);
+begin
+  FProxy.Active := false;
+
+  if (ip = '') or (StrToIntDef(port, 0) <= 0) then exit;
+
+  FProxy.Active := true;
+  FProxy.IP := ip;
+  FProxy.Port := port;
 end;
 
 end.

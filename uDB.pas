@@ -61,6 +61,7 @@ type
     function ClearPlanetSystem(Galaxy, System: integer): boolean;
     function UpdatePlanetSystem(PlanetSystem: TPlanetSystem): boolean;
     function GetPlanet(coords: TGameCoords): TEnemyPlanet;
+    function AddPlanet(pl: TEnemyPlanet): boolean;
 
     function UpdateUsers(users: TUserList): boolean;
     function UpdateUser(user: TUser): boolean;
@@ -85,6 +86,27 @@ type
 implementation
 
 { TMoonDB }
+
+function TMoonDB.AddPlanet(pl: TEnemyPlanet): boolean;
+begin
+  Result := false;
+  try
+    FIBQuery.SQL.Text := 'update or insert into universe ' +
+      '(galaxy, system, planet, name, user_id, have_moon, have_crashfield, last_update) values (' +
+      IntToStr(pl.Coords.Galaxy) + ',' +
+      IntToStr(pl.Coords.System) + ',' +
+      IntToStr(pl.Coords.Planet) + ',''' +
+      Trim(pl.Name) + ''',' +
+      IntToStr(pl.UserID) + ',' +
+      IntToStr(integer(pl.HaveMoon)) + ',' +
+      IntToStr(integer(pl.HaveCrashField)) + ',' +
+      'current_timestamp ) matching (galaxy, system, planet)';
+    FIBQuery.ExecQuery;
+
+    Result := true;
+  except
+  end;
+end;
 
 function TMoonDB.AddSystem(Galaxy, System: integer): boolean;
 begin
@@ -717,19 +739,7 @@ begin
 
     for i := 0 to length(PlanetSystem) - 1 do
       if not PlanetSystem[i].isEmpty then
-      begin
-        FIBQuery.SQL.Text := 'update or insert into universe ' +
-          '(galaxy, system, planet, name, user_id, have_moon, have_crashfield, last_update) values (' +
-          IntToStr(PlanetSystem[i].Coords.Galaxy) + ',' +
-          IntToStr(PlanetSystem[i].Coords.System) + ',' +
-          IntToStr(PlanetSystem[i].Coords.Planet) + ',''' +
-          Trim(PlanetSystem[i].Name) + ''',' +
-          IntToStr(PlanetSystem[i].UserID) + ',' +
-          IntToStr(integer(PlanetSystem[i].HaveMoon)) + ',' +
-          IntToStr(integer(PlanetSystem[i].HaveCrashField)) + ',' +
-          'current_timestamp ) matching (galaxy, system, planet)';
-        FIBQuery.ExecQuery;
-      end;
+        AddPlanet(PlanetSystem[i]);
 
     Result := true;
   except

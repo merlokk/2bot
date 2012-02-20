@@ -31,6 +31,12 @@ type
     Button3: TButton;
     Button4: TButton;
     Label6: TLabel;
+    btLoadProxyList: TButton;
+    OpenDialog1: TOpenDialog;
+    Label7: TLabel;
+    edProxyIP: TEdit;
+    Label8: TLabel;
+    edProxyPort: TEdit;
     procedure btRunClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure btInitClick(Sender: TObject);
@@ -39,6 +45,7 @@ type
     procedure btSaveClick(Sender: TObject);
     procedure btLoadClick(Sender: TObject);
     procedure edLogLevelChange(Sender: TObject);
+    procedure btLoadProxyListClick(Sender: TObject);
   private
     { Private declarations }
     game: TMoonFasade;
@@ -69,6 +76,9 @@ begin
   game.UserName := edLogin.Text;
   game.Password := edPassword.Text;
 
+  if edProxyIP.Text <> '' then
+    game.SetProxy(edProxyIP.Text, edProxyPort.Text);
+
   game.Init;
 end;
 
@@ -85,8 +95,18 @@ begin
     edLogin.Text := db.GetParam('Login', '');
     edPassword.Text := db.GetParam('Password', '');
     edLogLevel.Text := db.GetParam('LogLevel', '100');
+    edProxyIP.Text := db.GetParam('ProxyIP', '');
+    edProxyPort.Text := db.GetParam('ProxyPort', '');
   end;
 
+end;
+
+procedure TForm1.btLoadProxyListClick(Sender: TObject);
+begin
+  if game = nil then btInit.Click;
+
+  if OpenDialog1.Execute then
+    game.AddProxyToDB(OpenDialog1.FileName);
 end;
 
 procedure TForm1.btRunClick(Sender: TObject);
@@ -109,6 +129,8 @@ begin
   db.SetParam('Login', edLogin.Text);
   db.SetParam('Password', edPassword.Text);
   db.SetParam('LogLevel', edLogLevel.Text);
+  db.SetParam('ProxyIP', edProxyIP.Text);
+  db.SetParam('ProxyPort', edProxyPort.Text);
 end;
 
 procedure TForm1.edLogLevelChange(Sender: TObject);

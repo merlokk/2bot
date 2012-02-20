@@ -56,6 +56,20 @@ object Form1: TForm1
     Height = 16
     Caption = 'Editors:'
   end
+  object Label7: TLabel
+    Left = 232
+    Top = 38
+    Width = 45
+    Height = 16
+    Caption = 'proxy ip'
+  end
+  object Label8: TLabel
+    Left = 232
+    Top = 68
+    Width = 58
+    Height = 16
+    Caption = 'proxy port'
+  end
   object edGameUrl: TEdit
     Left = 72
     Top = 5
@@ -70,7 +84,6 @@ object Form1: TForm1
     Width = 121
     Height = 24
     TabOrder = 1
-    Text = 'merlok'
   end
   object edPassword: TEdit
     Left = 72
@@ -79,7 +92,6 @@ object Form1: TForm1
     Height = 24
     PasswordChar = '*'
     TabOrder = 2
-    Text = 'bossboss'
   end
   object btRun: TButton
     Left = 486
@@ -194,9 +206,40 @@ object Form1: TForm1
     Caption = 'build types'
     TabOrder = 15
   end
+  object btLoadProxyList: TButton
+    Left = 249
+    Top = 167
+    Width = 104
+    Height = 25
+    Caption = 'load proxies'
+    TabOrder = 16
+    OnClick = btLoadProxyListClick
+  end
+  object edProxyIP: TEdit
+    Left = 296
+    Top = 35
+    Width = 121
+    Height = 24
+    TabOrder = 17
+  end
+  object edProxyPort: TEdit
+    Left = 296
+    Top = 65
+    Width = 121
+    Height = 24
+    TabOrder = 18
+  end
   object Timer1: TTimer
     OnTimer = Timer1Timer
     Left = 640
     Top = 136
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = 'txt'
+    FileName = '*.*'
+    Filter = '*.*|all files'
+    InitialDir = '.'
+    Left = 440
+    Top = 88
   end
 end

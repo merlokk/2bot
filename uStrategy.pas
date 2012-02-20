@@ -121,7 +121,7 @@ type
     FFleet: TFleetOrderArr;
 
     FCurrCoords: TGameCoords;
-    procedure CalcNextCoords;
+    function CalcNextCoords: boolean;
   public
     constructor Create(imp: TImperium; srv: TMoonServerConnect; db: TMoonDB); override;
 
@@ -390,7 +390,7 @@ begin
   Prio := -1; // start strategy priority
 
   while True do
-  begin
+  try
     nPrio := -1;
     nIndx := -1;
     for i := 0 to length(FStrat) - 1 do
@@ -406,6 +406,7 @@ begin
       Prio := nPrio;
 
       if not FStrat[nIndx].Execute then exit;
+  except
   end;
 end;
 
@@ -673,21 +674,28 @@ end;
 
 { TStColonize }
 
-procedure TStColonize.CalcNextCoords;
+function TStColonize.CalcNextCoords: boolean;
 var
   i: Integer;
   pls: TPlanetSystem;
   usr: TUserList;
   LastCoords: TGameCoords;
+  firststep: boolean;
 begin
+ Result := false;
  i := 0;
  LastCoords := FCurrCoords;
+ LastCoords.Inc(FFromGalaxy, FToGalaxy, FFromSystem, FToSystem,
+   FFromPlanet, FToPlanet, 1);
+
+ firststep := true;
  while true do
  begin
    FCurrCoords.Inc(FFromGalaxy, FToGalaxy, FFromSystem, FToSystem,
      FFromPlanet, FToPlanet, 1);
-   if LastCoords.Equal(FCurrCoords) then break;
+   if LastCoords.Equal(FCurrCoords) and not firststep then break;
    if FImperium.GetPlanetC(FCurrCoords) <> nil then continue;
+   firststep := false;
    // если тут была планета то скорее всего она там и есть....
    if not FDB.GetPlanet(FCurrCoords).isEmpty then continue;
 
@@ -701,7 +709,11 @@ begin
    i := i + 1;
    if i > 100 then break;
 
-   if FDB.GetPlanet(FCurrCoords).isEmpty then exit;
+   if FDB.GetPlanet(FCurrCoords).isEmpty then
+   begin
+     Result := true;
+     exit;
+   end;
  end;
 end;
 
@@ -740,6 +752,7 @@ var
   ExpCnt: integer;
   i: Integer;
   pl: TPlanet;
+  epl: TEnemyPlanet;
   MinFields,
   MinIndx: integer;
   ships: TFleetOrderArr;
@@ -786,7 +799,14 @@ begin
       pl := FImperium.GetPlanetI(MinIndx);
       if pl <> nil then
       begin
-        FServer.DeletePlanet(pl.ID);
+        if FServer.DeletePlanet(pl.ID) then
+        begin
+          epl.Clear;
+          epl.Coords := pl.Coords;
+          epl.Name := 'deleted my planet';
+          FDB.AddPlanet(epl);
+        end;
+
         pl.Name := 'deleted';
         ExpCnt := ExpCnt - 1;
 
@@ -816,7 +836,7 @@ begin
 
   for i := 1 to ExpCnt do
   begin
-    CalcNextCoords;
+    if not CalcNextCoords then break;
     ships := Copy(FFleet, 0, length(FFleet));
     FServer.FleetMove(FImperium, FFromPlanetID, FCurrCoords, ships, foColonize, 10, 1);
     sleep(2000);
@@ -1117,6 +1137,7 @@ begin
 
     pl := FImperium.GetPlanet(PlanetID);
     if pl = nil then exit;
+    if pl.BuildsBuilding then exit;
 
     if ABuildType < 0 then
     begin
@@ -1135,7 +1156,6 @@ begin
       res  := FDB.GetBuildingRes(btree[i].Name, level);
       if (btree[i].Level > level) and
          (not res.Eq0) and
-         (not pl.BuildsBuilding) and
          (pl.HaveResources(res)) and
          (FImperium.PlanetCanBuild(PlanetID, btree[i].Name)) and
          ((MinResSumm < 0) or (MinResSumm > res.EkvResSumm))

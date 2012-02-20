@@ -11,7 +11,8 @@ uses
   uGameItems in 'uGameItems.pas',
   uHTMLParser in 'uHTMLParser.pas',
   superobject in 'JSON\superobject.pas',
-  uDB in 'uDB.pas';
+  uDB in 'uDB.pas',
+  uProxyCheck in 'uProxyCheck.pas';
 
 {$R *.res}
 

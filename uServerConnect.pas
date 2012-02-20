@@ -5,7 +5,7 @@ uses
   Classes, Windows, SysUtils, StrUtils, Forms,
   clHttpRequest, clGZip, clCookies, clConnection, clDownLoader,
   clTcpClient, clHttp, superobject,
-  uLogger, uGameItems, uHTMLParser, uDefs;
+  uLogger, uGameItems, uHTMLParser, uDefs, uProxyCheck;
 
 type
  TMoonServerConnect = class
@@ -14,6 +14,7 @@ type
    MaxLoginFailCount = 4;
    var
    FLoginFailCount: integer;
+   FProxy: TProxy;
 
    clHttpRequest,
    clHttpRequest2,
@@ -53,6 +54,8 @@ type
  public
    constructor Create;
    destructor Destroy; override;
+
+   procedure SetProxy(proxy: TProxy);
 
    function Login(AServerURL: string; AServerID: integer; AUserName, APassword: string): boolean;
    function DeleteMessages(MsgGroupID: integer): boolean;
@@ -873,6 +876,12 @@ begin
   end;
 
   try
+    if FProxy.Active then
+    begin
+      clHttp.ProxySettings.Server := FProxy.IP;
+      clHttp.ProxySettings.Port := StrToIntDef(FProxy.Port, 80);
+    end;
+
     clHttpRequest3.Assign(clHttpRequest);
     clHttpRequest3.AddFormField('uni', IntToStr(FServerID));
     clHttpRequest3.AddFormField('username', AUserName);
@@ -1047,6 +1056,11 @@ begin
     end;
   except
   end;
+end;
+
+procedure TMoonServerConnect.SetProxy(proxy: TProxy);
+begin
+  FProxy := proxy;
 end;
 
 function TMoonServerConnect.UpdateShipyard(imp: TImperium; PlanetID: integer; var ships: TShips): boolean;

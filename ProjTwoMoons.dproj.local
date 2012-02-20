@@ -1,26 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.326,=C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.096,C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.pas=C:\Projects\!chrome\2moons\uMain.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.298,C:\Projects\!chrome\2moons\Unit2.pas=C:\Projects\!chrome\2moons\uDefs.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.683,C:\Projects\!chrome\2moons\uGameItems.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.034,=C:\Projects\!chrome\2moons\Unit2.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.268,=C:\Projects\!chrome\2moons\Unit3.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.096,C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.dfm=C:\Projects\!chrome\2moons\uMain.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.310,C:\Projects\!chrome\2moons\Unit3.pas=C:\Projects\!chrome\2moons\uServerConnect.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.723,C:\Users\oleg\Documents\RAD Studio\Projects\Project1.dproj=C:\Projects\!chrome\2moons\ProjTwoMoons.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.562,=C:\Projects\!chrome\2moons\JSON\superobject.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.062,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uHTMLParser.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.855,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.371,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.137,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.952,C:\Projects\!chrome\2moons\uLogger.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.185,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.971,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uFasade.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.649,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uDB.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.219,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uStrategy.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.841,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.855,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.952,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uLogger.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.622,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.310,C:\Projects\!chrome\2moons\uServerConnect.pas=C:\Projects\!chrome\2moons\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.723,C:\Projects\!chrome\2moons\ProjTwoMoons.dproj=C:\Users\oleg\Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.034,=C:\Projects\!chrome\2moons\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.705,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uProxyCheck.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.326,=C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.765,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.096,C:\Projects\!chrome\2moons\uMain.dfm=C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.219,C:\Projects\!chrome\2moons\uStrategy.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.971,C:\Projects\!chrome\2moons\uFasade.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.298,C:\Projects\!chrome\2moons\uDefs.pas=C:\Projects\!chrome\2moons\Unit2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.096,C:\Projects\!chrome\2moons\uMain.pas=C:\Users\oleg\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.562,=C:\Projects\!chrome\2moons\JSON\superobject.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.683,C:\Projects\!chrome\2moons\Unit1.pas=C:\Projects\!chrome\2moons\uGameItems.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.841,=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.268,=C:\Projects\!chrome\2moons\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.062,C:\Projects\!chrome\2moons\uHTMLParser.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.649,C:\Projects\!chrome\2moons\uDB.pas=C:\Projects\!chrome\2moons\Unit1.pas</Transaction>
   </Transactions>
 </BorlandProject>
