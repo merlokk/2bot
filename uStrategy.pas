@@ -1154,7 +1154,8 @@ begin
     begin
       level := pl.GetBuildLevel(btree[i].Name);
       res  := FDB.GetBuildingRes(btree[i].Name, level);
-      if (btree[i].Level > level) and
+      if (btree[i].GroupName = 'Постройки') and
+         (btree[i].Level > level) and
          (not res.Eq0) and
          (pl.HaveResources(res)) and
          (FImperium.PlanetCanBuild(PlanetID, btree[i].Name)) and
