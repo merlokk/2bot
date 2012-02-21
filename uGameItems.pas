@@ -447,7 +447,10 @@ begin
   dep := TMoonDB.GetInstance.GetTechDeps(name);
   for i := 0 to length(dep) - 1 do
     if (dep[i].GroupName = 'Постройки') and
-       (pl.GetBuildLevel(dep[i].Name) < dep[i].Level) then
+       (pl.GetBuildLevel(dep[i].Name) < dep[i].Level) or
+       (dep[i].GroupName = 'Исследования') and
+       (GetResearchLevel(dep[i].Name) < dep[i].Level)
+    then
     begin
       Result := false;
       exit;
