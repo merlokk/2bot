@@ -121,6 +121,8 @@ type
     procedure UpdateAttr(AName: string; AValue: int64);
     procedure FinishUpdate;
 
+    function FreeFieldsCount: integer;
+
     procedure SetBuildingShips(Fleet: TFleetOrderArr; BuildEstimate: TDateTime = 0);
     procedure UpdateFromShipYard(ships: TShips);
     function GetShipsCount(name: string; CountCurrent, CountBuilding: boolean): int64;
@@ -421,7 +423,18 @@ var
 begin
   Result := true;
   pl := GetPlanet(PlanetID);
+  if pl = nil then exit;
 
+  // не застраивать планеты до упора
+  if ((name <> 'Терраформер') or
+      (name <> 'Лунная база')) and
+     (pl.FreeFieldsCount < 2) then
+  begin
+    Result := false;
+    exit;
+  end;
+
+  // при проведении исследований нельзя строить лабораторию и технополис
   if ((name = 'Исследовательская лаборатория') or
       (name = 'Технополис')) and
      (MakeResearch) then
@@ -430,20 +443,16 @@ begin
     exit;
   end;
 
-  if (name = 'Верфь') and
-     ((pl <> nil) and (pl.ShipsBuilding)) then
+  // при строительстве кораблей нельзя строить верфь и нанитку
+  if ((name = 'Верфь') or
+      (name = 'Фабрика нанитов')) and
+     (pl.ShipsBuilding) then
   begin
     Result := false;
     exit;
   end;
 
-  if (name = 'Фабрика нанитов') and
-     ((pl <> nil) and (pl.ShipsBuilding)) then
-  begin
-    Result := false;
-    exit;
-  end;
-
+  // нельзя строить то, что невозможно построить по дереву технологий
   dep := TMoonDB.GetInstance.GetTechDeps(name);
   for i := 0 to length(dep) - 1 do
     if (dep[i].GroupName = 'Постройки') and
@@ -569,6 +578,11 @@ end;
 procedure TPlanet.FinishUpdate;
 begin
   UpdateDT := Now;
+end;
+
+function TPlanet.FreeFieldsCount: integer;
+begin
+  Result := MaxFields - CurFields;
 end;
 
 function TPlanet.GetBuildLevel(name: string): integer;
