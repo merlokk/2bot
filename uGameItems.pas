@@ -127,11 +127,13 @@ type
     procedure UpdateFromShipYard(ships: TShips);
     function GetShipsCount(name: string; CountCurrent, CountBuilding: boolean): int64;
     function ShipsBuilding: boolean;
+    function StrShipsBuilding: string;
 
     procedure SetBuildingBuilds(Builds: TGameItems);
     procedure UpdateFromBuildings(builds: TGameItems);
     function GetBuildLevel(name: string): integer;
     function BuildsBuilding: boolean;
+    function StrBuildsBuilding: string;
 
     function HaveResources(res: TGameRes): boolean;
     function isResoucesLocked: boolean;
@@ -180,6 +182,7 @@ type
     function PlanetCanBuild(PlanetID: int64; name: string): boolean;
 
     function UpdateResearching(resch: TGameItems): boolean;
+    function StrResearching: string;
     function CanResearch(name: string): boolean;
     function MakeResearch: boolean;
   end;
@@ -426,8 +429,8 @@ begin
   if pl = nil then exit;
 
   // не застраивать планеты до упора
-  if ((name <> 'Терраформер') or
-      (name <> 'Лунная база')) and
+  if (name <> 'Терраформер') and
+     (name <> 'Лунная база') and
      (pl.FreeFieldsCount < 2) then
   begin
     Result := false;
@@ -490,6 +493,22 @@ end;
 function TImperium.ResearchCount: integer;
 begin
   Result := length(FResearch);
+end;
+
+function TImperium.StrResearching: string;
+var
+  i: integer;
+begin
+  if Length(FResearching) = 0 then
+  begin
+    Result := 'none';
+    exit;
+  end;
+
+  Result := '';
+  for i := 0 to length(FResearching) - 1 do
+    Result := Result + FResearching[i].Name + ' ' +
+      DateTimeToStr(FResearching[i].BuildTime) + ' ';
 end;
 
 function TImperium.UpdateResearching(resch: TGameItems): boolean;
@@ -673,6 +692,40 @@ begin
   Result :=
     (FBuildingShipsEndDT > now) and
     (length(FBuildingShips) > 0);
+end;
+
+function TPlanet.StrBuildsBuilding: string;
+var
+ i: integer;
+begin
+  if Length(FBuildingBuilds) = 0 then
+  begin
+    Result := 'none';
+    exit;
+  end;
+
+  Result := IntToStr(length(FBuildingBuilds)) + ' ';
+  for i := 0 to length(FBuildingBuilds) - 1 do
+    Result := Result + FBuildingBuilds[i].Name + ' ' +
+      DateTimeToStr(FBuildingBuilds[i].BuildTime) + ' ';
+end;
+
+function TPlanet.StrShipsBuilding: string;
+var
+ i: integer;
+begin
+  if Length(FBuildingShips) = 0 then
+  begin
+    Result := 'none';
+    exit;
+  end;
+
+  Result := IntToStr(length(FBuildingShips)) + ' ';
+  for i := 0 to length(FBuildingShips) - 1 do
+    Result := Result + FBuildingShips[i].Name + ' ';
+
+  if FBuildingShipsEndDT > 0 then
+    Result := Result + DateTimeToStr(FBuildingShipsEndDT);
 end;
 
 procedure TPlanet.UpdateAttr(AName: string; AValue: int64);

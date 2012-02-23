@@ -4,39 +4,45 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, uFasade, uDB, uLogger, ExtCtrls, Buttons;
+  Dialogs, StdCtrls, uFasade, uDB, uLogger, ExtCtrls, Buttons, ComCtrls;
 
 type
   TForm1 = class(TForm)
-    Label1: TLabel;
-    edGameUrl: TEdit;
-    Label2: TLabel;
-    edLogin: TEdit;
-    Label3: TLabel;
-    edPassword: TEdit;
-    btRun: TButton;
-    Label4: TLabel;
-    edWorldID: TEdit;
-    lbLog: TListBox;
-    Timer1: TTimer;
-    btSave: TBitBtn;
-    btInit: TBitBtn;
-    cbAutoRun: TCheckBox;
-    btCreateWorld: TButton;
-    btLoad: TButton;
-    edLogLevel: TEdit;
-    Label5: TLabel;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
-    Button4: TButton;
-    Label6: TLabel;
-    btLoadProxyList: TButton;
+    PageControl1: TPageControl;
+    tsEdit: TTabSheet;
+    tsStat: TTabSheet;
     OpenDialog1: TOpenDialog;
-    Label7: TLabel;
-    edProxyIP: TEdit;
-    Label8: TLabel;
+    Timer1: TTimer;
     edProxyPort: TEdit;
+    edProxyIP: TEdit;
+    btLoadProxyList: TButton;
+    Button4: TButton;
+    Button3: TButton;
+    Button2: TButton;
+    Button1: TButton;
+    edLogLevel: TEdit;
+    btLoad: TButton;
+    btCreateWorld: TButton;
+    cbAutoRun: TCheckBox;
+    btInit: TBitBtn;
+    btSave: TBitBtn;
+    edWorldID: TEdit;
+    btRun: TButton;
+    edPassword: TEdit;
+    edLogin: TEdit;
+    edGameUrl: TEdit;
+    Label8: TLabel;
+    Label7: TLabel;
+    Label6: TLabel;
+    Label5: TLabel;
+    Label4: TLabel;
+    Label3: TLabel;
+    Label2: TLabel;
+    Label1: TLabel;
+    lbLog: TListBox;
+    lvPlanets: TListView;
+    lbStat: TLabel;
+    btStartBot: TButton;
     procedure btRunClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure btInitClick(Sender: TObject);
@@ -46,6 +52,7 @@ type
     procedure btLoadClick(Sender: TObject);
     procedure edLogLevelChange(Sender: TObject);
     procedure btLoadProxyListClick(Sender: TObject);
+    procedure btStartBotClick(Sender: TObject);
   private
     { Private declarations }
     game: TMoonFasade;
@@ -111,6 +118,7 @@ end;
 
 procedure TForm1.btRunClick(Sender: TObject);
 begin
+  tsStat.Show;
   if game = nil then btInit.Click;
 
   game.Run;
@@ -133,6 +141,12 @@ begin
   db.SetParam('ProxyPort', edProxyPort.Text);
 end;
 
+procedure TForm1.btStartBotClick(Sender: TObject);
+begin
+  btRun.Click;
+  cbAutoRun.Checked := true;
+end;
+
 procedure TForm1.edLogLevelChange(Sender: TObject);
 begin
   SetLogLevel(StrToIntDef(edLogLevel.Text, 100));
@@ -150,6 +164,11 @@ begin
   if cbAutoRun.Checked and (game <> nil) then btRun.Click;
 
   GetSLLog(TStringList(lbLog.Items));
+  if game <> nil then
+  begin
+    game.StatPlanetList(lvPlanets);
+    lbStat.Caption := game.StrStat;
+  end;
 end;
 
 end.

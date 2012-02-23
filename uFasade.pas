@@ -2,8 +2,9 @@ unit uFasade;
 
 interface
 uses
-  SysUtils, Classes, pFIBQuery,
-  uLogger, uServerConnect, uGameItems, uStrategy, uDB, uProxyCheck;
+  SysUtils, Classes, pFIBQuery, ComCtrls,
+  uLogger, uServerConnect, uGameItems, uStrategy, uDB, uProxyCheck,
+  uDefs;
 
 type
  TMoonFasade = class
@@ -34,6 +35,9 @@ type
 
    procedure ClearProxy;
    procedure SetProxy(ip, port: string);
+
+   procedure StatPlanetList(lv: TListView);
+   function StrStat: string;
 
    property ServerURL: string read FServerURL write FServerURL;
    property ServerID: integer read FServerID write FServerID;
@@ -186,6 +190,59 @@ begin
   FProxy.Active := true;
   FProxy.IP := ip;
   FProxy.Port := port;
+end;
+
+procedure TMoonFasade.StatPlanetList(lv: TListView);
+var
+  li: TListItem;
+  i: Integer;
+  pl: TPlanet;
+begin
+  lv.Items.Clear;
+  if (FImperium = nil) or (not FImperium.Valid) then exit;
+
+  lv.Items.BeginUpdate;
+  try
+    for i := 0 to FImperium.PlanetsCount - 1 do
+    begin
+      pl := FImperium.GetPlanetI(i);
+      li := lv.Items.Add;
+      li.Caption := IntToStr(pl.ID);
+      if not pl.isMoon then
+        li.SubItems.Add(pl.Name)
+      else
+        li.SubItems.Add('(m)' + pl.Name);
+      li.SubItems.Add(IntToStr(pl.MaxFields - pl.CurFields));
+      li.SubItems.Add(ResToStr(pl.FreeEnergy));
+      li.SubItems.Add(pl.StrBuildsBuilding);
+      li.SubItems.Add(pl.StrShipsBuilding);
+    end;
+  finally
+    lv.Items.EndUpdate;
+  end;
+
+end;
+
+function TMoonFasade.StrStat: string;
+begin
+  if (FImperium = nil) then
+  begin
+    Result := 'imperium n/a';
+    exit;
+  end;
+  if (not FImperium.Valid) then
+  begin
+    Result := 'imperium not valid';
+    exit;
+  end;
+
+  Result := DateTimeToStr(FImperium.LastUpdate) + ': ' +
+      ' dm=' + IntToStr(FImperium.DarkMatery) +
+      ' pl=' + IntToStr(FImperium.PlanetsCount) +
+      ' moon=' + IntToStr(FImperium.MoonsCount) +
+      ' rsrch=' + IntToStr(FImperium.ResearchCount) +
+      #10#13 +
+      'researching=' + FImperium.StrResearching;
 end;
 
 end.

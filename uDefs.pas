@@ -11,6 +11,8 @@ function SOAsShips(obj: ISuperObject; name: string): TFleetOrderArr;
 
 function TimeBetween(dt: TDateTime; FromHour, ToHour: integer): boolean;
 
+function ResToStr(res: int64): string;
+
 implementation
 
 function SOAsString(obj: ISuperObject; name: string): string;
@@ -83,6 +85,35 @@ function TimeBetween(dt: TDateTime; FromHour, ToHour: integer): boolean;
 begin
   Result :=
     (HourOf(dt) >= FromHour) and (HourOf(dt) <= ToHour);
+end;
+
+function ResToStr(res: int64): string;
+begin
+  Result := IntToStr(abs(res));
+  try
+    if length(Result) > 12 then
+    begin
+      Result := Copy(Result, 1, length(Result) - 12) + 'B';
+      exit;
+    end;
+    if length(Result) > 9 then
+    begin
+      Result := Copy(Result, 1, length(Result) - 9) + 'TM';
+      exit;
+    end;
+    if length(Result) > 6 then
+    begin
+      Result := Copy(Result, 1, length(Result) - 6) + 'M';
+      exit;
+    end;
+    if length(Result) > 3 then
+    begin
+      Result := Copy(Result, 1, length(Result) - 3) + 'T';
+      exit;
+    end;
+  finally
+    if res < 0 then Result := '-' + Result;
+  end;
 end;
 
 end.

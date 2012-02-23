@@ -398,7 +398,14 @@ begin
     id := TParser.GetTagAttrib(taga, 'href');
     id := TParser.URLDecode(id);
     id := TParser.GetURLParam(id, 'building');
-    s := TParser.GetTagText(taga);
+    if taga <> '' then
+    begin
+      s := TParser.GetTagText(taga);
+    end
+    else
+    begin
+      s := TParser.CopyToI(s, '<');
+    end;
     s := Trim(s);
     // name   "Рудник кристалла 51"
     s1 := ReverseString(s);
