@@ -1138,6 +1138,7 @@ begin
     pl := FImperium.GetPlanet(PlanetID);
     if pl = nil then exit;
     if pl.BuildsBuilding then exit;
+    if pl.FreeFieldsCount <=0 then exit;
 
     if ABuildType < 0 then
     begin

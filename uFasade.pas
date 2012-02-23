@@ -212,7 +212,7 @@ begin
         li.SubItems.Add(pl.Name)
       else
         li.SubItems.Add('(m)' + pl.Name);
-      li.SubItems.Add(IntToStr(pl.MaxFields - pl.CurFields));
+      li.SubItems.Add(IntToStr(pl.FreeFieldsCount));
       li.SubItems.Add(ResToStr(pl.FreeEnergy));
       li.SubItems.Add(pl.StrBuildsBuilding);
       li.SubItems.Add(pl.StrShipsBuilding);
