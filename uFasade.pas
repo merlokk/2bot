@@ -216,6 +216,17 @@ begin
       li.SubItems.Add(ResToStr(pl.FreeEnergy));
       li.SubItems.Add(pl.StrBuildsBuilding);
       li.SubItems.Add(pl.StrShipsBuilding);
+      li.SubItems.Add(
+        ResToStr(pl.CurRes.Metal) + '/' +
+        ResToStr(pl.CurRes.Crystal) + '/' +
+        ResToStr(pl.CurRes.Deiterium));
+      if pl.BuildingPlan.EndPlaningDate > Now then
+      begin
+        li.SubItems.Add(pl.BuildingPlan.Item.Name + ' ' +
+          DateTimeToStr(pl.BuildingPlan.EndPlaningDate));
+      end
+      else
+        li.SubItems.Add(' ');
     end;
   finally
     lv.Items.EndUpdate;
@@ -242,7 +253,9 @@ begin
       ' moon=' + IntToStr(FImperium.MoonsCount) +
       ' rsrch=' + IntToStr(FImperium.ResearchCount) +
       #10#13 +
-      'researching=' + FImperium.StrResearching;
+      'researching=' + FImperium.StrResearching +
+      #10#13 +
+      'research plan=' + FImperium.StrResearcPlan;
 end;
 
 end.

@@ -56,6 +56,7 @@ type
   private
     { Private declarations }
     game: TMoonFasade;
+    FViewCnt: integer;
   public
     { Public declarations }
   end;
@@ -155,6 +156,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   game := nil;
+  FViewCnt := 0;
+
   edLogLevelChange(Self);
   btLoad.Click;
 end;
@@ -163,11 +166,17 @@ procedure TForm1.Timer1Timer(Sender: TObject);
 begin
   if cbAutoRun.Checked and (game <> nil) then btRun.Click;
 
-  GetSLLog(TStringList(lbLog.Items));
-  if game <> nil then
+  FViewCnt := FViewCnt + 1;
+  if FViewCnt > 5 then
   begin
-    game.StatPlanetList(lvPlanets);
-    lbStat.Caption := game.StrStat;
+    FViewCnt := 0;
+
+    GetSLLog(TStringList(lbLog.Items));
+    if game <> nil then
+    begin
+      game.StatPlanetList(lvPlanets);
+      lbStat.Caption := game.StrStat;
+    end;
   end;
 end;
 

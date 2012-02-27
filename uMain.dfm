@@ -23,10 +23,8 @@ object Form1: TForm1
     ActivePage = tsEdit
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 799
     object tsEdit: TTabSheet
       Caption = 'Edit'
-      ExplicitHeight = 768
       object Label8: TLabel
         Left = 3
         Top = 68
@@ -248,7 +246,6 @@ object Form1: TForm1
     object tsStat: TTabSheet
       Caption = 'Statistic'
       ImageIndex = 1
-      ExplicitHeight = 768
       DesignSize = (
         720
         905)
@@ -256,7 +253,7 @@ object Form1: TForm1
         Left = 8
         Top = 8
         Width = 709
-        Height = 34
+        Height = 50
         AutoSize = False
         Caption = '                '
       end
@@ -267,13 +264,12 @@ object Form1: TForm1
         Height = 373
         Anchors = [akLeft, akRight, akBottom]
         TabOrder = 0
-        ExplicitTop = 392
       end
       object lvPlanets: TListView
         Left = 3
-        Top = 48
+        Top = 64
         Width = 714
-        Height = 475
+        Height = 459
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
           item
@@ -284,8 +280,7 @@ object Form1: TForm1
             Width = 100
           end
           item
-            Caption = 'free fields'
-            Width = 70
+            Caption = 'f fields'
           end
           item
             Caption = 'energy'
@@ -300,8 +295,12 @@ object Form1: TForm1
             Width = 70
           end
           item
+            Caption = 'MET/CRY/DEI'
+            Width = 110
           end
           item
+            Caption = 'plan'
+            Width = 100
           end>
         DoubleBuffered = True
         ReadOnly = True
@@ -309,7 +308,6 @@ object Form1: TForm1
         ParentDoubleBuffered = False
         TabOrder = 1
         ViewStyle = vsReport
-        ExplicitHeight = 338
       end
     end
   end

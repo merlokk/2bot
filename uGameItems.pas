@@ -42,6 +42,7 @@ type
     function MoreThan(r: TGameRes): boolean;
     function EkvResSumm: int64;
     function ResSumm: int64;
+    procedure NormalizeLow(mark: int64);
   end;
 
   TLockResRec = packed record
@@ -75,6 +76,15 @@ type
     procedure Clear;
   end;
   TShips = array of TShip;
+
+  TWorkPlan = packed record
+    Active: boolean;
+    Item: TGameItem;
+    NeedRes: TGameRes;
+    EndPlaningDate: TDateTime;
+
+    procedure Clear;
+  end;
 
   TFleetOrder = (foNone = 0, foAtack=1, foTransport=3, foLeave=4, foState=5,
     foSpy=6, foColonize=7, foRecycle=8, foDarkMateryMine = 11, foExpedition = 15);
@@ -111,8 +121,9 @@ type
     FreeEnergy: int64;
     isMoon: boolean;
 
-    serial: cardinal;
+    BuildingPlan: TWorkPlan;
 
+    serial: cardinal;
     UpdateDT: TDateTime;
 
     constructor Create;
@@ -156,6 +167,8 @@ type
     MaxFleets,
     CurFleets: integer;
 
+    ResearchingPlan: TWorkPlan;
+
     constructor Create;
 
     procedure Clear;
@@ -183,6 +196,7 @@ type
 
     function UpdateResearching(resch: TGameItems): boolean;
     function StrResearching: string;
+    function StrResearcPlan: string;
     function CanResearch(name: string): boolean;
     function MakeResearch: boolean;
   end;
@@ -284,6 +298,7 @@ begin
 
   ClearPlanets;
   ClearResearch;
+  ResearchingPlan.Clear;
 end;
 
 procedure TImperium.ClearPlanets;
@@ -511,6 +526,18 @@ begin
       DateTimeToStr(FResearching[i].BuildTime) + ' ';
 end;
 
+function TImperium.StrResearcPlan: string;
+begin
+  if ResearchingPlan.EndPlaningDate < Now then
+  begin
+    Result := 'none';
+    exit;
+  end;
+
+  Result := ResearchingPlan.Item.Name + ' ' +
+    DateTimeToStr(ResearchingPlan.EndPlaningDate);
+end;
+
 function TImperium.UpdateResearching(resch: TGameItems): boolean;
 begin
   Result := true;
@@ -584,6 +611,7 @@ begin
   SetLength(FBuildingBuilds, 0);
 
   FLockResources.Clear;
+  BuildingPlan.Clear;
 
   serial := 0;
 end;
@@ -881,6 +909,13 @@ begin
   Deiterium := Deiterium * m;
 end;
 
+procedure TGameRes.NormalizeLow(mark: int64);
+begin
+  if Metal < mark then Metal := mark;
+  if Crystal < mark then Crystal := mark;
+  if Deiterium < mark then Deiterium := mark;
+end;
+
 function TGameRes.ResSumm: int64;
 begin
   Result := Metal + Crystal + Deiterium;
@@ -990,6 +1025,16 @@ begin
   Res.Clear;
   LockFrom := 0;
   LockTo := 0;
+end;
+
+{ TPlaningItem }
+
+procedure TWorkPlan.Clear;
+begin
+  Active := false;
+  Item.Clear;
+  NeedRes.Clear;
+  EndPlaningDate := 0;
 end;
 
 end.

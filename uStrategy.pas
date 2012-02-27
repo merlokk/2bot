@@ -132,10 +132,13 @@ type
 
   TStPlanetBuild = class(TStrategy)
   private
+    FPlaningLock: integer;
     FLockRes: boolean;
     FBuildType: integer;
 
     function IntBuildPlanet(PlanetID: integer): boolean;
+    procedure CalcBuild(pl: TPlanet; btree: TGameItems; var indx: Integer);
+    procedure CalcBuildPlan(pl: TPlanet; btree: TGameItems; var indx: Integer);
   public
     constructor Create(imp: TImperium; srv: TMoonServerConnect; db: TMoonDB); override;
 
@@ -146,9 +149,11 @@ type
 
   TStResearch = class(TStrategy)
   private
+    FPlaningLock: integer;
     FLockRes: boolean;
     FMaxLength: integer;
     procedure CalcResearch(rtree: TGameItems; pl: TPlanet; var indx: Integer);
+    procedure CalcResearchPlan(rtree: TGameItems; pl: TPlanet; var indx: Integer);
   public
     constructor Create(imp: TImperium; srv: TMoonServerConnect; db: TMoonDB); override;
 
@@ -912,13 +917,13 @@ begin
       en := FImperium.PlanetsCount - 1;
     end;
 
-    SetLength(Fleet, 1);
-    Fleet[0].Name := '—олнечный спутник';
-    Fleet[0].Value := FIncCount;
-
     Result := true;
     for i := bg to en do
     begin
+      SetLength(Fleet, 1);
+      Fleet[0].Name := '—олнечный спутник';
+      Fleet[0].Value := FIncCount;
+
       pl := FImperium.GetPlanetI(i);
       if (pl = nil) or (pl.FreeEnergy >= 0) or (pl.ShipsBuilding)
       then continue;
@@ -1105,12 +1110,46 @@ end;
 
 { TStPlanetBuild }
 
+procedure TStPlanetBuild.CalcBuildPlan(pl: TPlanet; btree: TGameItems;
+  var indx: Integer);
+var
+  i: Integer;
+  bres,
+  res: TGameRes;
+  MinResSumm: Int64;
+  level: Integer;
+begin
+  if pl = nil then exit;
+
+  indx := -1;
+  MinResSumm := -1;
+  for i := 0 to length(btree) - 1 do
+  begin
+    if btree[i].GroupName <> 'ѕостройки' then continue;
+
+    level := pl.GetBuildLevel(btree[i].Name);
+    res := FDB.GetBuildingRes(btree[i].Name, level);
+    if res.Eq0 then continue;
+    bres := pl.CurRes;
+    res.Sub(bres);
+    res.NormalizeLow(0);
+    if (btree[i].Level > level) and
+       (FImperium.PlanetCanBuild(pl.ID, btree[i].Name)) and
+       ((MinResSumm < 0) or (MinResSumm > res.ResSumm)) then
+    begin
+      MinResSumm := res.ResSumm;
+      indx := i;
+    end;
+  end;
+end;
+
 procedure TStPlanetBuild.Clear;
 begin
   inherited;
 
   FLockRes := false;
   FBuildType := -1;
+  FPlaningLock := 60 * 30;
 end;
 
 constructor TStPlanetBuild.Create(imp: TImperium; srv: TMoonServerConnect;
@@ -1125,11 +1164,7 @@ var
   ABuildType: integer;
   pl: TPlanet;
   btree: TGameItems;
-  level,
-  indx,
-  i: Integer;
-  res: TGameRes;
-  MinResSumm: int64;
+  indx: Integer;
 begin
   Result := false;
   try
@@ -1148,29 +1183,26 @@ begin
     end;
 
     btree := FDB.GetPlanetBuildTree(ABuildType);
-
-    indx := -1;
-    MinResSumm := -1;
-    for i := 0 to length(btree) - 1 do
+    CalcBuild(pl, btree, indx);
+    if indx >= 0 then
     begin
-      level := pl.GetBuildLevel(btree[i].Name);
-      res  := FDB.GetBuildingRes(btree[i].Name, level);
-      if (btree[i].GroupName = 'ѕостройки') and
-         (btree[i].Level > level) and
-         (not res.Eq0) and
-         (pl.HaveResources(res)) and
-         (FImperium.PlanetCanBuild(PlanetID, btree[i].Name)) and
-         ((MinResSumm < 0) or (MinResSumm > res.EkvResSumm))
-      then
-      begin
-        MinResSumm := res.EkvResSumm;
-        indx := i;
-      end;
+      Result := FServer.BuildBuilding(FImperium, PlanetID,
+        btree[indx].Name, btree[indx].Level, false);
+      exit;
     end;
-    if indx < 0 then exit;
 
-    Result := FServer.BuildBuilding(FImperium, PlanetID,
-      btree[indx].Name, btree[indx].Level, false);
+    // планирование
+    CalcBuildPlan(pl, btree, indx);
+    if indx >= 0 then
+    begin
+      pl.BuildingPlan.Clear;
+      pl.BuildingPlan.Item := btree[indx];
+      //!!!!!!!!!!!!!!!!!
+      pl.BuildingPlan.NeedRes := btree[indx].BuildRes;
+      pl.BuildingPlan.EndPlaningDate :=
+        Now + 1 / SecsPerDay * FPlaningLock;
+    end;
+
   except
   end;
 end;
@@ -1194,6 +1226,35 @@ begin
     IntBuildPlanet(FImperium.GetPlanetI(i).ID);
   end;
   FServer.UpdateImperium(FImperium);
+end;
+
+procedure TStPlanetBuild.CalcBuild(pl: TPlanet; btree: TGameItems;
+  var indx: Integer);
+var
+  i: Integer;
+  res: TGameRes;
+  MinResSumm: Int64;
+  level: Integer;
+begin
+  if pl = nil then exit;
+
+  indx := -1;
+  MinResSumm := -1;
+  for i := 0 to length(btree) - 1 do
+  begin
+    level := pl.GetBuildLevel(btree[i].Name);
+    res := FDB.GetBuildingRes(btree[i].Name, level);
+    if (btree[i].GroupName = 'ѕостройки') and
+       (btree[i].Level > level) and
+       (not res.Eq0) and
+       (pl.HaveResources(res)) and
+       (FImperium.PlanetCanBuild(pl.ID, btree[i].Name)) and
+       ((MinResSumm < 0) or (MinResSumm > res.EkvResSumm)) then
+    begin
+      MinResSumm := res.EkvResSumm;
+      indx := i;
+    end;
+  end;
 end;
 
 function TStPlanetBuild.LoadConfig(cfg: string): ISuperObject;
@@ -1260,12 +1321,47 @@ end;
 
 { TStResearch }
 
+procedure TStResearch.CalcResearchPlan(rtree: TGameItems; pl: TPlanet;
+  var indx: Integer);
+var
+  bres,
+  res: TGameRes;
+  MinResSumm: Int64;
+  i: Integer;
+  level: Integer;
+  rlen: Integer;
+begin
+  indx := -1;
+  MinResSumm := -1;
+  for i := 0 to length(rtree) - 1 do
+  begin
+    if rtree[i].GroupName <> '»сследовани€' then continue;
+
+    level := FImperium.GetResearchLevel(rtree[i].Name);
+    bres := FDB.GetBuildingRes(rtree[i].Name, level);
+    if bres.Eq0 then continue;
+    res := pl.CurRes;
+    res.Sub(bres);
+    res.NormalizeLow(0);
+    rlen := Trunc(FDB.GetBuildingLength(rtree[i].Name, level) * 24 * 60 * 60);
+    if (rtree[i].Level > level) and
+       ((FMaxLength = 0) or (rlen < FMaxLength)) and
+       ((MinResSumm < 0) or (MinResSumm > res.ResSumm)) and
+       (FImperium.CanResearch(rtree[i].Name)) then
+    begin
+      MinResSumm := res.ResSumm;
+      indx := i;
+    end;
+  end;
+end;
+
 procedure TStResearch.Clear;
 begin
   inherited;
 
   FLockRes := false;
   FMaxLength := 0;
+  FPlaningLock := 60 * 30;
 end;
 
 constructor TStResearch.Create(imp: TImperium; srv: TMoonServerConnect;
@@ -1278,8 +1374,10 @@ end;
 function TStResearch.IntExecute: boolean;
 var
   pl: TPlanet;
-  rtree: TGameItems;
-  indx: integer;
+  rtree1,
+  rtree2: TGameItems;
+  indx1,
+  indx2: integer;
 begin
   Result := true;
   try
@@ -1290,27 +1388,73 @@ begin
        (pl.GetBuildLevel('»сследовательска€ лаборатори€') < 1)
     then exit;
 
-    rtree := FDB.GetPlanetBuildTree(100);
-    CalcResearch(rtree, pl, indx);
-    if indx < 0 then
-    begin
-      rtree := FDB.GetImperiumBuildTree;
-      CalcResearch(rtree, pl, indx);
-    end;
-    if indx < 0 then exit;
+    // пробуем исследовать записанные исследовани€
+    rtree1 := FDB.GetPlanetBuildTree(100);
+    CalcResearch(rtree1, pl, indx1);
 
-    Result := FServer.MakeResearch(FImperium, FFromPlanetID,
-      rtree[indx].Name, rtree[indx].Level);
+    // пробуем исследовать исследовани€ дл€ дерева технологий
+    // необходимых дл€ развити€ планет
+    rtree2 := FDB.GetImperiumBuildTree;
+    CalcResearch(rtree2, pl, indx2);
+
+    // выбрать минимальное по времени исследование
+    if (indx1 >= 0) and (indx2 >= 0) then
+    begin
+      if FDB.GetBuildingLength(
+            rtree1[indx1].Name,
+            FImperium.GetResearchLevel(rtree1[indx1].Name)) >
+         FDB.GetBuildingLength(rtree2[indx2].Name,
+            FImperium.GetResearchLevel(rtree1[indx2].Name))
+      then
+        indx1 := 0;
+    end;
+
+    if indx1 >= 0 then
+    begin
+      Result := FServer.MakeResearch(FImperium, FFromPlanetID,
+        rtree1[indx1].Name, rtree1[indx1].Level);
+      exit;
+    end;
+
+    if indx2 >= 0 then
+    begin
+      Result := FServer.MakeResearch(FImperium, FFromPlanetID,
+        rtree2[indx2].Name, rtree2[indx2].Level);
+      exit;
+    end;
+
+    // планируем исследовани€, если счас ничего не исследуетс€
+    // или ничего не получилось исследовать
+    CalcResearchPlan(rtree1, pl, indx1);
+    CalcResearchPlan(rtree2, pl, indx2);
+
+    if indx1 >= 0 then
+    begin
+      FImperium.ResearchingPlan.Clear;
+      FImperium.ResearchingPlan.Item := rtree1[indx1];
+      FImperium.ResearchingPlan.EndPlaningDate :=
+        Now + 1 / SecsPerDay * FPlaningLock;
+      exit;
+    end;
+
+    if indx2 >= 0 then
+    begin
+      FImperium.ResearchingPlan.Clear;
+      FImperium.ResearchingPlan.Item := rtree2[indx2];
+      FImperium.ResearchingPlan.EndPlaningDate :=
+        Now + 1 / SecsPerDay * FPlaningLock;
+      exit;
+    end;
   except
   end;
 end;
 
-procedure TStResearch.CalcResearch(rtree: TGameItems; pl: TPlanet; var indx: Integer);
+procedure TStResearch.CalcResearch(rtree: TGameItems; pl: TPlanet;
+  var indx: Integer);
 var
   res: TGameRes;
   MinResSumm: Int64;
   i: Integer;
-  level2: Integer;
   level: Integer;
   rlen: Integer;
 begin
@@ -1318,9 +1462,9 @@ begin
   MinResSumm := -1;
   for i := 0 to length(rtree) - 1 do
   begin
+    if rtree[i].GroupName <> '»сследовани€' then continue;
+
     level := FImperium.GetResearchLevel(rtree[i].Name);
-    level2 := pl.GetBuildLevel(rtree[i].Name);
-    level := max(level, level2);
     res := FDB.GetBuildingRes(rtree[i].Name, level);
     rlen := Trunc(FDB.GetBuildingLength(rtree[i].Name, level) * 24 * 60 * 60);
     if (rtree[i].Level > level) and
@@ -1342,6 +1486,7 @@ begin
 
   FLockRes := SOAsBooleanDef(Result, 'LockRes', false);
   FMaxLength := SOAsIntegerDef(Result, 'MaxLength', 0);
+  FPlaningLock := SOAsIntegerDef(Result, 'PlaningLock', 60 * 30);
 end;
 
 end.
